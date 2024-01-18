@@ -1,0 +1,72 @@
+[
+    {
+        "id": "2e91de12-04f5-4e9d-89a6-83d76c67ac57",
+        "role": "doctor",
+        "email": "doctor1@example.com",
+        "password": "password123",
+        "name": "Dr. John Smith"
+    },
+    {
+        "id": "d7ab7ea2-3f24-4c36-9a79-28b92a2f6c7c",
+        "role": "doctor",
+        "email": "doctor2@example.com",
+        "password": "password123",
+        "name": "Dr. Sarah Johnson"
+    },
+    {
+        "id": "33b237b1-4af3-42c3-94b9-184c471b9bf4",
+        "role": "patient",
+        "email": "patient1@example.com",
+        "password": "password123",
+        "name": "Alice Jones"
+    },
+    {
+        "id": "8a810c50-e36a-44d5-ae48-2d045bc9a2e5",
+        "role": "patient",
+        "email": "patient2@example.com",
+        "password": "password123",
+        "name": "Bob Smith"
+    },
+    {
+        "id": "bfe1e4c3-068a-4b3d-8c2b-c5b32b712947",
+        "role": "patient",
+        "email": "patient3@example.com",
+        "password": "password123",
+        "name": "Charlie Brown"
+    },
+    {
+        "id": "89a5d1f8-033f-4816-90ee-6dc8a74b7107",
+        "role": "patient",
+        "email": "patient4@example.com",
+        "password": "password123",
+        "name": "Diana Rodriguez"
+    },
+    {
+        "id": "a4eb3c4d-cd3a-4b28-8a3e-dc0df1a09c48",
+        "role": "patient",
+        "email": "patient5@example.com",
+        "password": "password123",
+        "name": "Eli Thompson"
+    },
+    {
+        "id": "8ddc6d75-6d6f-41a8-9c10-76e4c5cb9c3d",
+        "role": "patient",
+        "email": "patient6@example.com",
+        "password": "password123",
+        "name": "Fiona Green"
+    },
+    {
+        "id": "e0e51da2-c28a-4b10-bf26-7eaa3b80c5fd",
+        "role": "patient",
+        "email": "patient7@example.com",
+        "password": "password123",
+        "name": "George Davis"
+    },
+    {
+        "id": "3c92d54a-831e-4242-a4c9-dfbf49706715",
+        "role": "patient",
+        "email": "patient8@example.com",
+        "password": "password123",
+        "name": "Hannah Lee"
+    }
+]
