@@ -1,0 +1,12 @@
+.navBar {
+    background-color: #002856;
+    color: white;
+    text-align: center;
+}
+
+.navBar a {
+    color: white;
+    text-decoration: none;
+    padding: 14px 25px;
+    display: inline-block;
+}
