@@ -5,31 +5,31 @@ import {
 import type { NextPage } from 'next';
 import '@livekit/components-styles';
 import { useRouter } from 'next/router';
-import { AuthContext } from "@/contexts/AuthContext";
-import { useContext, useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { Track } from 'livekit-client';
-import Cookies from 'js-cookie';
 import Layout from '@/components/Layout';
 import OffCanvasInfo from '@/components/OffCanvas';
 import PatientInfo from '@/components/PatientInfo';
-import appoitments from '../../public/appoitments.json';
 import patientData from '../../public/patientData.json';
-
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import OffCanvasCalendar from '@/components/OffCanvasCalendar';
 
 
 const VideoConference: NextPage = () => {
     const router = useRouter();
     const { id } = router.query;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const params = typeof window !== 'undefined' ? new URLSearchParams(location.search) : null;
     const roomName = id?.toString() ?? "";
-    const { user } = useContext(AuthContext);
-    const userIdentity = user?.name ?? "";
+    const { data: session } = useSession();
+    const [user, setUser] = useState<any>(null);
+    const [appoitment, setAppoitment] = useState<any>(null);
+    const userIdentity = session?.user?.name ?? "test";
     const [connect, setConnect] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
-    const { isLoggedIn } = useContext(AuthContext);
     const [patient, setPatient] = useState<any>(null);
-
+    const [events, setEvents] = useState<any[]>([]);
 
     const token = useToken(process.env.NEXT_PUBLIC_LK_TOKEN_ENDPOINT, roomName, {
         userInfo: {
@@ -38,29 +38,56 @@ const VideoConference: NextPage = () => {
         },
     })
 
+    const getUserByEmail = async (email: string) => {
+        fetch(`/api/getUserByEmail?email=${email}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setUser(data);
+            });
+    }
+
+    const getAppoitmentById = async (id: string) => {
+        fetch(`/api/getAppointmentById?id=${id}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setAppoitment(data);
+            });
+    }
+
+    const getAppointmentByUser = async (id: string, role:string) => {
+        fetch(`/api/getAppointmentByUser?id${role}=${id}`)
+            .then((response) => response.json())
+            .then((data) => {
+                setEvents(data);
+            });
+    }
+
     const handleDisconnect = () => {
         setConnect(false);
         setIsConnected(false);
     };
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        if (!session) {
             router.push('/login');
+        } else if (session.user?.email) {
+            getUserByEmail(session.user.email)
+            getAppoitmentById(id?.toString() ?? "");
+            
         }
-    }, [isLoggedIn]);
+    }, [id, router, session]);
 
     useEffect(() => {
-        if (!isLoggedIn) {
-            Cookies.set('redirectUrl', "room/" + roomName);
+        if (user?.id) {
+            getAppointmentByUser(user?.id, user?.role[0].toUpperCase() + user?.role.slice(1));
         }
+    }, [user]);
+
+    useEffect(() => {
         if (params) {
-            const appoitment = appoitments.find((appoitment) => appoitment.id === id);
             setPatient(patientData.find((patient: any) => patient.idPaciente === appoitment?.idPatient))
-            if (appoitment) {
-                Cookies.set('redirectUrl', "room/" + roomName);
-            }
         }
-    }, [id]);
+    }, [appoitment?.idPatient, id, params]);
 
     return (
         <Layout data-lk-theme="default">
@@ -78,9 +105,23 @@ const VideoConference: NextPage = () => {
             ) :
                 (
                     <>
-                        {user?.role === 'doctor' &&
-                            <OffCanvasInfo patientInfoSelected={patient} />
-                        }
+                        <div className='d-flex py-2 justify-content-center'>
+                            {user?.role === 'doctor' &&
+                                <OffCanvasInfo patientInfoSelected={patient} />
+                            }
+                            {user?.role === 'doctor' &&
+                                <OffCanvasCalendar 
+                                events={events}                                
+                                enableAddDate={true} patientInfo={
+                                    {
+                                        title: appoitment?.title,
+                                        idPatient: appoitment?.idPatient,
+                                        idDoctor: appoitment?.idDoctor,
+                                    }
+                                }
+                                />
+                            }
+                        </div>
                         <div className='text-center py-2'>
                             <Button variant='danger' onClick={() => setIsConnected(!isConnected)}>
                                 Desconectar

@@ -10,26 +10,42 @@ type EventModalProps = {
     setShow: (value: boolean) => void;
     selectedEvent?: DateEvent;
     hideButton?: boolean
+    newEvent?: boolean
+    appointmentData?: any
 };
 
 
-const EventModal = ({ show, setShow, selectedEvent, hideButton }: EventModalProps) => {
+const EventModal = ({ show, setShow, selectedEvent, hideButton, newEvent, appointmentData }: EventModalProps) => {
     const router = useRouter();
     const [title, setTitle] = useState<string>(selectedEvent?.title?.toString() || '')
     const [start, setStart] = useState<Date>(selectedEvent?.start || new Date());
     const [end, setEnd] = useState<Date>(selectedEvent?.end || new Date());
     const publicURL = process.env.NEXT_PUBLIC_ENDPOINT;
 
+
+    const appointment = {
+        idPatient: appointmentData?.idPatient,
+        idDoctor: appointmentData?.idDoctor,
+        title: title,
+        start: start,
+        end: end,
+    };
+
     const handleClose = () => setShow(false);
 
     const handleSave = () => {
-        // Aquí puedes hacer lo que necesites para guardar el evento
-        // ...
+        fetch('/api/appoitments', {
+            method: 'POST',
+            body: JSON.stringify(appointment),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
         handleClose();
     };
 
     const handleSelectEvent = () => {
-        console.log(selectedEvent);
         router.push(`/room/${selectedEvent?.id}`);
         handleClose();
     };
@@ -45,15 +61,14 @@ const EventModal = ({ show, setShow, selectedEvent, hideButton }: EventModalProp
     return (
         <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>{selectedEvent?.title ? 'Editar Evento' : 'Nuevo Evento'}</Modal.Title>
+                <Modal.Title>{newEvent ? 'Editar Evento' : 'Nuevo Evento'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {!selectedEvent?.title ?
-
+                {newEvent ?
                     <Form>
                         <Form.Group controlId="formTitle">
-                            <Form.Label>Título</Form.Label>
-                            <Form.Control type="text" placeholder="Ingrese el título del evento" value={title} onChange={(e) => setTitle(e.target.value)} />
+                            <Form.Label>Paciente</Form.Label>
+                            <Form.Control type="text" disabled placeholder="Ingrese el título del evento" value={title} onChange={(e) => setTitle(e.target.value)} />
                         </Form.Group>
                         <Form.Group controlId="formStart">
                             <Form.Label>Fecha de inicio</Form.Label>
@@ -66,9 +81,10 @@ const EventModal = ({ show, setShow, selectedEvent, hideButton }: EventModalProp
                     </Form>
                     :
                     <>
-                        <p>Paciente: {selectedEvent.title}</p>
-                        <p>Inicio: {selectedEvent.start.toLocaleDateString()}</p>
-                        URL sesion: <a>{publicURL + "/room/" + selectedEvent.id}</a>
+                        <p>Paciente: {selectedEvent?.title}</p>
+                        <p>Inicio: {selectedEvent?.start ? new Date(selectedEvent?.start).toLocaleDateString() : ''}</p>
+                        <p>Hora: {new Date(selectedEvent?.start ?? '').toLocaleTimeString()}</p>
+                        URL sesion: <a>{publicURL + "/room/" + selectedEvent?.id}</a>
                     </>
 
                 }

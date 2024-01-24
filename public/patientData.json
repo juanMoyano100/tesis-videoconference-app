@@ -1,6 +1,8 @@
 [
     {
         "nivelAcceso": 1,
+        "idPaciente": "65aeabd92b1730d0daa2f3c6",
+        "idDoctor": "65aa74c1520ffd75ab0a4183",
         "institucionSistema": "Institucion Sistema",
         "unidadOperativa": "Unidad 1",
         "codUO": "001",
@@ -41,6 +43,8 @@
     },
     {
         "nivelAcceso": 2,
+        "idPaciente": "65aeabe22b1730d0daa2f3ca",
+        "idDoctor": "65aa7509520ffd75ab0a4185",        
         "institucionSistema": "Institucion Sistema",
         "unidadOperativa": "Unidad 1",
         "codUO": "001",
@@ -133,8 +137,8 @@
         "medicamentos": "Ibuprofeno 400mg cada 6 horas, Amoxicilina 500mg cada 8 horas."
     },
     {
-        "idPaciente": "33b237b1-4af3-42c3-94b9-184c471b9bf4",
-        "idDoctor": "2e91de12-04f5-4e9d-89a6-83d76c67ac57",
+        "idPaciente": "65aeabe52b1730d0daa2f3cc",
+        "idDoctor": "65aa74c1520ffd75ab0a4183",
         "nivelAcceso": 3,
         "institucionSistema": "Institucion Sistema",
         "unidadOperativa": "Unidad 1",
