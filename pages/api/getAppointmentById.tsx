@@ -4,17 +4,16 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const getAppointmentById = async (req: NextApiRequest, res: NextApiResponse) => {
     const { id } = req.query;
-
     try {
         await connectMongoDB();
         if (!id) {
-            res.status(500).json({ message: 'Error al obtener cita' });
+            return res.status(500).json({ message: 'Error al obtener cita' });
         }
         const appointment = await Appointment.findById(id);
         if (!appointment) {
-            res.status(500).json({ message: 'Error al obtener cita' });
+            return res.status(500).json({ message: 'Error al obtener cita' });
         } else {
-            res.status(200).json(
+            return res.status(200).json(
                 {
                     id: appointment._id,
                     idDoctor: appointment.idDoctor,
@@ -26,7 +25,7 @@ const getAppointmentById = async (req: NextApiRequest, res: NextApiResponse) => 
             )
         }
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener cita' });
+        return res.status(500).json({ message: 'Error al obtener cita' });
     }
 }
 
