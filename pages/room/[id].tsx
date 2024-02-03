@@ -141,7 +141,7 @@ const VideoConference: NextPage = () => {
                             setPatientState(data.state);
                         }
                     })
-            }, 9000);
+            }, 5000);
             return () => clearInterval(interval);
         }
     }, [appoitment?.idDoctor, appoitment?.idPatient, user?.role, patientState]);
