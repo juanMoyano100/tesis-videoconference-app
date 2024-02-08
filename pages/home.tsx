@@ -23,6 +23,7 @@ const HomePage = () => {
     }
 
     useEffect(() => {
+        if (session === undefined) return;
         if (!session) {
             router.push('/login');
         } else if (session.user?.email) {

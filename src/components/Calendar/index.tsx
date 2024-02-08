@@ -4,7 +4,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import moment from 'moment'
 import 'moment-timezone'
 import 'moment/locale/es' // Importa el idioma de tu preferencia
-import { useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import EventModal from '../Modal'
 
 moment.tz.setDefault('America/Guayaquil')
@@ -13,7 +13,7 @@ const localizer = momentLocalizer(moment);
 const MyCalendar = ({ events, enableAddDate, patientInfo }: any) => {
     const [show, setShow] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<DateEvent>();
-
+    const [eventsList, setEventsList] = useState<Event[]>(events);
     const handleSelectSlot = ({ start, end }: { start: Date, end: Date }) => {
         setSelectedEvent({
             id: '',
@@ -25,6 +25,10 @@ const MyCalendar = ({ events, enableAddDate, patientInfo }: any) => {
         setShow(true);
     };
 
+    useEffect(() => {   
+        setEventsList(events);
+    }, [events]);
+
     const handleSelectEvent = (event: DateEvent) => {
         setSelectedEvent(event);
         setShow(true);
@@ -33,8 +37,8 @@ const MyCalendar = ({ events, enableAddDate, patientInfo }: any) => {
         <>
             <Calendar
                 localizer={localizer}
-                key={events?.id}
-                events={events?.map((event: any) => ({   
+                key={"events?.id"}
+                events={eventsList?.map((event: any) => ({
                     id: event.id,
                     title: event.title,
                     start: new Date(event.start),
@@ -51,6 +55,7 @@ const MyCalendar = ({ events, enableAddDate, patientInfo }: any) => {
                 popup={true}
             />
             <EventModal
+                setEventsList={setEventsList}
                 show={show}
                 setShow={setShow}
                 selectedEvent={selectedEvent}

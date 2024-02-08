@@ -11,7 +11,7 @@ const OffCanvasInfo = (patientInfoSelected: any) => {
     return (
         <>
             <div className='text-center py-2'>
-            <Button variant="primary" onClick={toggleShow} className="me-2">
+            <Button variant="primary" onClick={toggleShow} className="me-2" style={{background: "#1e1e1e", border: "#1e1e1e"}}>
                 Información del paciente
             </Button>
             </div>

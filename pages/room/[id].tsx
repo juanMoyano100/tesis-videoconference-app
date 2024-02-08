@@ -1,26 +1,30 @@
 import {
     ControlBar, GridLayout, LiveKitRoom, ParticipantTile, RoomAudioRenderer, TrackContext, useToken, useTracks,
-    Chat
+    Chat,
+    VideoConference,
+    LocalUserChoices,
 } from '@livekit/components-react';
+
+import { VideoConference as CustomVideo } from '@/components/VideoConference';
 import type { NextPage } from 'next';
 import '@livekit/components-styles';
 import { useRouter } from 'next/router';
 import { Button, Row, Spinner } from 'react-bootstrap';
-import { Track } from 'livekit-client';
+import { DeviceUnsupportedError, ExternalE2EEKeyProvider, Room, RoomConnectOptions, RoomOptions, Track, VideoCodec, VideoPresets } from 'livekit-client';
 import Layout from '@/components/Layout';
 import OffCanvasInfo from '@/components/OffCanvas';
 import PatientInfo from '@/components/PatientInfo';
 import patientData from '../../public/patientData.json';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import OffCanvasCalendar from '@/components/OffCanvasCalendar';
 import styles from './style.module.css'
 import RequestModal from '@/components/RequestModal';
+import dynamic from 'next/dynamic';
 
-
-const VideoConference: NextPage = () => {
+const VideoConferencePage: NextPage = () => {
     const router = useRouter();
-    const { id } = router.query;
+    const { id, codec, hq } = router.query;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const params = typeof window !== 'undefined' ? new URLSearchParams(location.search) : null;
     const roomName = id?.toString() ?? "";
@@ -37,6 +41,9 @@ const VideoConference: NextPage = () => {
     const [error, setError] = useState<string>("");
 
     const [patientState, setPatientState] = useState<string>("");
+    const [preJoinChoices, setPreJoinChoices] = useState<LocalUserChoices | undefined>(
+        undefined,
+    );
 
     const token = useToken(process.env.NEXT_PUBLIC_LK_TOKEN_ENDPOINT, roomName, {
         userInfo: {
@@ -92,6 +99,7 @@ const VideoConference: NextPage = () => {
     }
 
     useEffect(() => {
+        if (session === undefined) return;
         if (!session) {
             router.push('/login');
         } else if (session.user?.email) {
@@ -158,11 +166,24 @@ const VideoConference: NextPage = () => {
                 {patientState === 'APROBADO' ? (
                     <>
                         <div className='d-flex justify-content-center py-2'>
-                            <Button variant='success' onClick={() => setIsConnected(!isConnected)}>
-                                Ingresar a la Sala
-                            </Button>
+                            {user &&
+                                <PreJoinNoSSR
+                                    data-lk-theme="default"
+                                    onError={(err) => console.log('error while setting up prejoin', err)}
+                                    defaults={{
+                                        username: user.name,
+                                        videoEnabled: false,
+                                        audioEnabled: false,
+                                    }}
+                                    userLabel='Nombre'
+                                    camLabel='Cámara'
+                                    micLabel='Micrófono'
+                                    joinLabel='Unirse'
+                                    onSubmit={handlePreJoinSubmit}
+                                ></PreJoinNoSSR>
+                            }
                         </div>
-                        <PatientInfo patientInfoSelected={patient} />
+                        <OffCanvasInfo patientInfoSelected={patient} />
                     </>
                 ) : (
                     <div className={styles.form}>
@@ -215,9 +236,22 @@ const VideoConference: NextPage = () => {
                 {patientState === 'APROBADO' ? (
                     <>
                         <div className='d-flex justify-content-center py-2'>
-                            <Button variant='success' onClick={() => setIsConnected(!isConnected)}>
-                                Ingresar a la Sala
-                            </Button>
+                            {user &&
+                                <PreJoinNoSSR
+                                    data-lk-theme="default"
+                                    onError={(err) => console.log('error while setting up prejoin', err)}
+                                    defaults={{
+                                        username: user.name,
+                                        videoEnabled: false,
+                                        audioEnabled: false,
+                                    }}
+                                    userLabel='Nombre'
+                                    camLabel='Cámara'
+                                    micLabel='Micrófono'
+                                    joinLabel='Unirse'
+                                    onSubmit={handlePreJoinSubmit}
+                                ></PreJoinNoSSR>
+                            }
                         </div>
                     </>
                 ) : (
@@ -255,19 +289,35 @@ const VideoConference: NextPage = () => {
         )
     }
 
+    const PreJoinNoSSR = dynamic(
+        async () => {
+            return (await import('@livekit/components-react')).PreJoin;
+        },
+        { ssr: false },
+    );
+    function handlePreJoinSubmit(values: LocalUserChoices) {
+        setPreJoinChoices(values);
+        setIsConnected(!isConnected)
+    }
+
     return (
         <Layout data-lk-theme="default">
             {!isConnected ? (
-                <>
+                <div style={{ background: "#111", height: "calc(100vh - 74px)" }}>
+
+
                     {user?.role === 'doctor' && renderDoctorPreCall()}
                     {user?.role === 'patient' && renderPatientPreCall()}
-                </>
+                </div>
             ) :
                 (
-                    <>
-                        <div className='d-flex py-2 justify-content-center'>
+                    <div style={{ height: 'calc(100vh - 141px)' }}
+                    >
+                        <div className='d-flex py-2 justify-content-center' style={{ background: "#111" }} >
                             {user?.role === 'doctor' &&
-                                <OffCanvasInfo patientInfoSelected={patient} />
+                                <OffCanvasInfo patientInfoSelected={patient}
+
+                                />
                             }
                             {user?.role === 'doctor' &&
                                 <OffCanvasCalendar
@@ -282,26 +332,31 @@ const VideoConference: NextPage = () => {
                                 />
                             }
                         </div>
-                        <div className='text-center py-2'>
-                            <Button variant='danger' onClick={() => setIsConnected(!isConnected)}>
-                                Desconectar
-                            </Button>
-                        </div>
+
                         <LiveKitRoom
+                            video={preJoinChoices?.videoEnabled ?? true}
+                            audio={preJoinChoices?.audioEnabled ?? true}
                             token={token}
                             serverUrl={process.env.NEXT_PUBLIC_LK_SERVER_URL}
-                            connect={isConnected}
-                            onConnected={() => setIsConnected(true)}
+                            data-lk-theme="default"
                             onDisconnected={handleDisconnect}
-                            audio={true}
-                            video={true}
+                            connect={isConnected}
+                            onConnected={() => {
+                                setConnect(true);
+                            }
+                            }
+
+
                         >
-                            <RoomAudioRenderer />
-                            <Stage />
-                            <ControlBar />
-                            <Chat style={{ width: "100%" }} />
+                            {/* <MyVideoConference /> */}
+
+                            {/* <VideoConference /> */}
+                            <CustomVideo
+                            />
+
                         </LiveKitRoom>
-                    </>
+
+                    </div>
                 )
 
             }
@@ -309,6 +364,35 @@ const VideoConference: NextPage = () => {
 
     );
 };
+
+function MyVideoConference() {
+    // `useTracks` returns all camera and screen share tracks. If a user
+    // joins without a published camera track, a placeholder track is returned.
+    const tracks = useTracks(
+        [
+            { source: Track.Source.Camera, withPlaceholder: true },
+            { source: Track.Source.ScreenShare, withPlaceholder: false },
+        ],
+        { onlySubscribed: false },
+    );
+    return (
+        <>
+            <GridLayout tracks={tracks} style={{ height: 'calc(100vh - var(--lk-control-bar-height))' }}>
+                {/* The GridLayout accepts zero or one child. The child is used
+        as a template to render all passed in tracks. */}
+                <ParticipantTile>
+                    <TrackContext.Consumer>
+                        {(track) => <ParticipantTile {...track} />}
+                    </TrackContext.Consumer>
+
+                </ParticipantTile>
+
+            </GridLayout>
+        </>
+    );
+}
+
+
 
 function Stage() {
     const cameraTracks = useTracks([Track.Source.Camera]);
@@ -322,5 +406,4 @@ function Stage() {
         </>
     );
 }
-
-export default VideoConference;
+export default VideoConferencePage;

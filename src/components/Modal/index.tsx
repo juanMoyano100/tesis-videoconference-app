@@ -12,10 +12,11 @@ type EventModalProps = {
     hideButton?: boolean
     newEvent?: boolean
     appointmentData?: any
+    setEventsList?: (value: any) => void;
 };
 
 
-const EventModal = ({ show, setShow, selectedEvent, hideButton, newEvent, appointmentData }: EventModalProps) => {
+const EventModal = ({ show, setShow, selectedEvent, hideButton, newEvent, appointmentData, setEventsList}: EventModalProps) => {
     const router = useRouter();
     const [title, setTitle] = useState<string>(selectedEvent?.title?.toString() || '')
     const [start, setStart] = useState<Date>(selectedEvent?.start || new Date());
@@ -41,7 +42,19 @@ const EventModal = ({ show, setShow, selectedEvent, hideButton, newEvent, appoin
                 'Content-Type': 'application/json',
             },
         })
-            .then((response) => response.json())
+            .then((response) => response.json()).then((data) => {
+                setEventsList && setEventsList(
+                    (prev: any) => [
+                        ...prev,
+                        {
+                            id: data.id,
+                            title: data.title,
+                            start: new Date(data.start),
+                            end: new Date(data.end),
+                        },
+                    ]
+                );
+            })
         handleClose();
     };
 
@@ -72,7 +85,11 @@ const EventModal = ({ show, setShow, selectedEvent, hideButton, newEvent, appoin
                         </Form.Group>
                         <Form.Group controlId="formStart">
                             <Form.Label>Fecha de inicio</Form.Label>
-                            <Form.Control type="datetime-local" value={moment(start).format('YYYY-MM-DDTHH:mm')} onChange={(e) => setStart(moment(e.target.value).toDate())} />
+                            <Form.Control type="datetime-local" value={moment(start).format('YYYY-MM-DDTHH:mm')} onChange={(e) => {
+                                setStart(moment(e.target.value).toDate())
+                                setEnd(moment(e.target.value).add(1, "hour").toDate())
+                            }
+                            } />
                         </Form.Group>
                         <Form.Group controlId="formEnd">
                             <Form.Label>Fecha de fin</Form.Label>

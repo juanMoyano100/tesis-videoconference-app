@@ -10,7 +10,7 @@ const OffCanvasCalendar = (patientInfo: any, events:any) => {
     return (
         <>
             <div className='text-center py-2'>
-                <Button variant="primary" onClick={toggleShow} className="me-2">
+                <Button variant="primary" onClick={toggleShow} className="me-2" style={{background: "#1e1e1e", border: "#1e1e1e"}}>
                     Agendar Cita
                 </Button>
             </div>

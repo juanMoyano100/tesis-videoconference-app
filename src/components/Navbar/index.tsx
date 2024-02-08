@@ -10,7 +10,7 @@ const NavBar = () => {
         <Navbar.Brand style={{ color: "#fff" }} href="/">VideoConference App</Navbar.Brand>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav>
-            <Nav.Link href="/" >Home</Nav.Link>
+            <Nav.Link href="/home" >Home</Nav.Link>
           </Nav>
         </Navbar.Collapse>
           <Button variant="outline-success" onClick={() => { signOut() }}>Cerrar sesión</Button>
