@@ -1,6 +1,5 @@
 import type {
   MessageDecoder,
-  MessageEncoder,
   TrackReferenceOrPlaceholder,
   WidgetState,
 } from '@livekit/components-core';
@@ -16,6 +15,7 @@ import {
   FocusLayoutContainer,
   GridLayout,
   LayoutContextProvider,
+  MessageEncoder,
   MessageFormatter,
   ParticipantTile,
   RoomAudioRenderer,

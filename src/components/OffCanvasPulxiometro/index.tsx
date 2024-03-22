@@ -34,7 +34,7 @@ const OffCanvasPulxiometro = (appoitment: any) => {
           setPulxiometroData(data);
         });
     }, 5000);
-    setGlobalInterval(intervalId);
+    setGlobalInterval(intervalId as any);
     setDataStarted(true);
   };
 
