@@ -6,17 +6,18 @@ const getPulxiometroInfo = async (
   req: NextApiRequest,
   res: NextApiResponse
 ) => {
-  const { id_paciente } = req.query;
+  const { id_pulsioximetro } = req.query;
 
   try {
     await connectMongoDB();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    if (!id_paciente) {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    if (!id_pulsioximetro) {
       return res.status(500).json({ message: "Error al obtener datos" });
     }
     const request = await PulxiometroData.find({
-      id_paciente,
-    //   timestamp: { $gte: oneHourAgo },
+      id_pulsioximetro,
+      timestamp: { $gte: tenMinutesAgo },
     }).sort({ createdAt: -1 });
 
     if (!request) {

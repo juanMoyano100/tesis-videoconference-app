@@ -7,6 +7,7 @@ const PulxiometroDataSchema = new Schema({
   ppm: {
     type: Number,
   },
+  id_pulsioximetro: { type: String },
   timestamp: { type: Date },
 });
 

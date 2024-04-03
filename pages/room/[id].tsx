@@ -404,7 +404,7 @@ const VideoConferencePage: NextPage = () => {
               />
             )}
             {user?.role === "doctor" && (
-              <OffCanvasPulxiometro appoitment={appoitment} />
+              <OffCanvasPulxiometro />
             )}
           </div>
 

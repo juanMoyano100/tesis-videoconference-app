@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Offcanvas, Table } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Form,
+  Offcanvas,
+  Row,
+  Table,
+} from "react-bootstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,24 +18,28 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import moment from "moment";
 
-const OffCanvasPulxiometro = (appoitment: any) => {
+const OffCanvasPulxiometro = () => {
   const [show, setShow] = useState(false);
 
   const handleClose = () => {
-    setShow(false)
-    handleStopGetPulxiometroData()
-  }
+    setShow(false);
+    handleStopGetPulxiometroData();
+    setShowPulxiometroInfo(false);
+  };
   const toggleShow = () => setShow((s) => !s);
   const [pulxiometroData, setPulxiometroData] = useState([]);
   const [globalInterval, setGlobalInterval] = useState(5000);
   const [dataStarted, setDataStarted] = useState(false);
+  const [pulxiometroId, setPulxiometroId] = useState("");
+  const [showPulxiometroInfo, setShowPulxiometroInfo] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const timerInterval = useRef<any>();
 
   const handleStartPulxiometroData = () => {
     const intervalId = setInterval(() => {
-      fetch(
-        `/api/getPulxiometroInfo?id_paciente=${appoitment?.appoitment?.idPatient}`
-      )
+      fetch(`/api/getPulxiometroInfo?id_pulsioximetro=${pulxiometroId}`)
         .then((response) => response.json())
         .then((data) => {
           setPulxiometroData(data);
@@ -36,11 +47,16 @@ const OffCanvasPulxiometro = (appoitment: any) => {
     }, 5000);
     setGlobalInterval(intervalId as any);
     setDataStarted(true);
+    setSeconds(0);
+    timerInterval.current = setInterval(() => {
+      setSeconds((seconds) => seconds + 1);
+    }, 1000);
   };
 
   const handleStopGetPulxiometroData = () => {
     clearInterval(globalInterval);
     setDataStarted(false);
+    clearInterval(timerInterval.current);
   };
 
   const [displayData, setDisplayData] = useState([]);
@@ -85,8 +101,16 @@ const OffCanvasPulxiometro = (appoitment: any) => {
     },
   };
 
-  const labels = displayData.map((item: any) => item.timestamp.split("T")[1]);
-  
+  const labels = displayData.map((item: any) =>
+    moment(item.timestamp).utcOffset("America/Guayaquil").format("HH:mm:ss")
+  );
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  };
+
   const data = {
     labels,
     datasets: [
@@ -125,56 +149,160 @@ const OffCanvasPulxiometro = (appoitment: any) => {
         </Offcanvas.Header>
         <Offcanvas.Body>
           <div className="d-flex">
-            <Button
-              variant="primary"
-              onClick={handleStartPulxiometroData}
-              className="me-2"
-            >
-              Obtener lectura
-            </Button>
-            <Button
-              variant="danger"
-              onClick={handleStopGetPulxiometroData}
-              className="me-2"
-            >
-              Detener lectura
-            </Button>
+            {!showPulxiometroInfo ? (
+              <>
+                <Form.Label style={{ width: "200px", alignSelf: "center" }}>
+                  Nro. Pulxiometro
+                </Form.Label>
+                <Form.Control
+                  type="email"
+                  placeholder="Ingrese el numero del pulxiometro"
+                  className="mx-2"
+                  value={pulxiometroId}
+                  onChange={(e) => setPulxiometroId(e.target.value)}
+                />
+                <Button
+                  variant="primary"
+                  onClick={() => setShowPulxiometroInfo(true)}
+                  className="mx-2"
+                >
+                  Guardar
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="primary"
+                  onClick={handleStartPulxiometroData}
+                  className="m-2"
+                >
+                  Obtener lectura
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleStopGetPulxiometroData}
+                  className="m-2"
+                >
+                  Detener lectura
+                </Button>
+                <div className="m-2" style={{ alignSelf: "center" }}>
+                  {formatTime(seconds)}
+                </div>
+              </>
+            )}
           </div>
-          {dataStarted ? <div>Obteniendo datos...</div> : <div>Detenido</div>}
-          <div
-            className="d-flex"
-            style={{ height: "500px", maxHeight: "500px", overflow: "overlay" }}
-          >
-            <Table striped bordered hover size="sm" style={{ height: "300px" }}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Hora</th>
-                  <th>PPM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayData.length > 0 ? (
-                  displayData.map((data: any, index: number) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>{data.timestamp}</td>
-                      <td>{data.ppm}</td>
-                    </tr>
-                  ))
-                ) : (
+          <div className="m-2">
+            {dataStarted ? <>Obteniendo datos...</> : <>Detenido</>}
+          </div>
+          <Container>
+            <div
+              className="d-flex"
+              style={{ height: "30vh", maxHeight: "30vh", overflow: "overlay" }}
+            >
+              <Table striped bordered hover size="sm">
+                <thead>
                   <tr>
-                    <td colSpan={3}>No hay datos</td>
+                    <th>#</th>
+                    <th>Hora</th>
+                    <th>PPM</th>
                   </tr>
-                )}
-              </tbody>
-            </Table>
-          </div>
-          <div
-            className="d-flex"
-            style={{ height: "500px", maxHeight: "500px", overflow: "overlay" }}
-          >
-            <Line options={options} data={data} />;
+                </thead>
+                <tbody>
+                  {displayData.length > 0 ? (
+                    displayData.map((data: any, index: number) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {moment(data.timestamp)
+                            .utcOffset("America/Guayaquil")
+                            .format("HH:mm:ss")}
+                        </td>
+                        <td>{data.ppm}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3}>No hay datos</td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
+          </Container>
+          <Container>
+            <div
+              className="d-flex justify-content-around align-items-center text-center mt-3"
+              style={{ color: "#666666" }}
+            >
+              <div
+                style={{
+                  width: "33%",
+                  margin: "0 5px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "5px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <>Min</>
+                <h3>
+                  {displayData.length > 0
+                    ? Math.min(
+                        ...displayData
+                          .filter((item: any) => item.ppm !== 0)
+                          .map((item: any) => item.ppm)
+                      )
+                    : 0}
+                </h3>
+              </div>
+              <div
+                style={{
+                  width: "33%",
+                  margin: "0 5px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "5px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <>Max</>
+                <h3>
+                  {displayData.length > 0
+                    ? Math.max(...displayData.map((item: any) => item.ppm))
+                    : 0}
+                </h3>
+              </div>
+              <div
+                style={{
+                  width: "33%",
+                  margin: "0 5px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "5px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <>Avg</>
+                <h3>
+                  {displayData.length > 0
+                    ? Math.round(
+                        displayData.reduce(
+                          (acc: number, item: any) => acc + item.ppm,
+                          0
+                        ) / displayData.length
+                      )
+                    : 0}
+                </h3>
+              </div>
+            </div>
+          </Container>
+          <div className="d-flex">
+            <Container>
+              <Line options={options} data={data} />
+            </Container>
           </div>
         </Offcanvas.Body>
       </Offcanvas>
