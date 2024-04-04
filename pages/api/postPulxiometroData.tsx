@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const apikey = req.body.api_key;
 
     if (apikey === apikeyvalue1) {
-      // Handle apikeyvalue1
+      return res.status(200).json({ message: "Handled apikeyvalue1." });
     } else if (apikey === apikeyvalue2) {
       const collection: Collection = db.collection("pulsioximetroDataCompleto");
       const id_pulsioximetro = req.body.id_pulsioximetro;
@@ -43,9 +43,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const result = await collection.insertOne(document);
 
       if (result) {
-        res.status(200).json({ message: "Document inserted successfully." });
+        return res.status(200).json({ message: "Document inserted successfully." });
       } else {
-        res.status(500).json({ message: "Error." });
+        return res.status(500).json({ message: "Error." });
       }
     } else if (apikey === apikeyvalue3) {
       const collection: Collection = db.collection("pulsioximetroData");
@@ -62,9 +62,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const result = await collection.insertOne(document);
 
       if (result) {
-        res.status(200).json({ message: "Document inserted successfully." });
+        return res.status(200).json({ message: "Document inserted successfully." });
       } else {
-        res.status(500).json({ message: "Error." });
+        return res.status(500).json({ message: "Error." });
       }
     }
     res.status(405).json({ message: "Method not allowed" });
