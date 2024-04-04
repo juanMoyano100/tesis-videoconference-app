@@ -1,13 +1,21 @@
 import { Navbar, Container, Nav, Button } from "react-bootstrap";
 import styles from './style.module.css'
 import { signOut } from "next-auth/react"
+import Image from "next/image";
+
 
 
 const NavBar = () => {
   return (
     <Navbar expand="lg" className={styles.navBar} >
       <Container>
-        <Navbar.Brand style={{ color: "#fff" }} href="/">VideoConference App</Navbar.Brand>
+          <Image
+            src="/banner.png"
+            width={150}      
+            height={50}      
+            className="d-inline-block align-top"
+            alt="Logo"
+          />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav>
             <Nav.Link href="/home" >Home</Nav.Link>
