@@ -2,13 +2,11 @@ import { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import styles from './style.module.css'
 
-interface RegisterFormProps {
-    onSubmit: (email: string, password: string) => void;
-}
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
+const RegisterForm: React.FC = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -17,7 +15,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             setError("Por favor ingrese todos los campos")
             return;
         }
-
+        setIsLoading(true)
         try {
             const res = await fetch('api/register', {
                 method: 'POST',
@@ -28,14 +26,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             })
             if (res.ok) {
                 const form = e.target as HTMLFormElement;
+                setIsLoading(false)
+                setError("")
                 form.reset();
-
             }
         } catch (error: any) {
             setError(error.message);
+            setIsLoading(false)
         }
 
-        // onSubmit(email, password);
     };
 
     return (
@@ -62,8 +61,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                 />
             </Form.Group>
 
-            <Button variant="success" className="mt-3 w-100" type="submit">
-                Login
+            <Button variant="success" className="mt-3 w-100" type="submit"
+                disabled={isLoading}
+            >
+                Registrar
             </Button>
         </Form>
     );

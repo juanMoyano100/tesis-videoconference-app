@@ -6,10 +6,7 @@ import styles from './styles.module.css'
 const EventList = (eventsList: any) => {
     const [show, setShow] = useState(false);
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
     const [selectedEvent, setSelectedEvent] = useState<DateEvent>();
-
     return (
         <>
             <ListGroup>
@@ -21,9 +18,8 @@ const EventList = (eventsList: any) => {
                             setShow(true);
                         }}
                     >
-                        {event.title} - {event.start.toDateString()} -{" "}
-                        {event.start.getHours()}:{event.start.getMinutes()+"0"} hs
-
+                        {event.title} - {new Date(event.start).toLocaleString()} -{" "}
+                        {new Date(event.start).toLocaleTimeString()}
                     </ListGroup.Item>
                 ))}
             </ListGroup>

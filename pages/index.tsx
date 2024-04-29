@@ -1,18 +1,20 @@
 import { AuthContext } from "@/contexts/AuthContext";
+import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/dist/client/router";
 import { useContext, useEffect } from 'react';
 
 const IndexPage = () => {
   const router = useRouter();
-  const authContext = useContext(AuthContext);
+  const { data: session } = useSession();
 
   useEffect(() => {
-    if (authContext.isLoggedIn) {
+    if (session) {
       router.push('/home');
     } else {
       router.push('/login');
-    }    
-  }, [authContext]);
+    }
+  }, [router, session]);
+
 
   return (
     <div>

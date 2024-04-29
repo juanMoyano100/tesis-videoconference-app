@@ -1,13 +1,11 @@
 import { Row, Col } from "react-bootstrap";
-import LoginForm from "../src/components/LoginForm";
-import { AuthContext } from "@/contexts/AuthContext";
-import { useContext, useEffect } from "react";
-import Cookies from 'js-cookie';
 import Image from "next/image";
 import image from "../public/assets/img-start.webp";
 import { useRouter } from "next/router";
+import RegisterForm from "@/components/RegisterForm";
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
+
     return (
         <div style={{ background: "#002856", padding: "10%", height: "100vh" }}>
             <Row className="h-100" style={{ background: "#e5e0e0", borderRadius: "5px" }}>
@@ -17,11 +15,11 @@ const LoginPage: React.FC = () => {
                     />
                 </Col>
                 <Col>
-                    <LoginForm/>
+                    <RegisterForm />
                 </Col>
             </Row>
         </div>
     );
 };
 
-export default LoginPage;
+export default RegisterPage;

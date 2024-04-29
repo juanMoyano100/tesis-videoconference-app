@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Button, Offcanvas } from "react-bootstrap";
-import PatientInfo from "../PatientInfo";
+import MyCalendar from "../Calendar";
 
-const OffCanvasInfo = (patientInfoSelected: any) => {
-
+const OffCanvasCalendar = (patientInfo: any, events:any) => {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -11,21 +10,21 @@ const OffCanvasInfo = (patientInfoSelected: any) => {
     return (
         <>
             <div className='text-center py-2'>
-            <Button variant="primary" onClick={toggleShow} className="me-2" style={{background: "#1e1e1e", border: "#1e1e1e"}}>
-                Información del paciente
-            </Button>
+                <Button variant="primary" onClick={toggleShow} className="me-2" style={{background: "#1e1e1e", border: "#1e1e1e"}}>
+                    Agendar Cita
+                </Button>
             </div>
 
             <Offcanvas className="lg" show={show} onHide={handleClose} scroll={true} placement="end" style={{ width: "50%" }}    >
                 <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>Información del paciente</Offcanvas.Title>
+                    <Offcanvas.Title>Agendar Cita</Offcanvas.Title>
                 </Offcanvas.Header>
                 <Offcanvas.Body>
-                    <PatientInfo patientInfoSelected={patientInfoSelected?.patientInfoSelected} />
+                    <MyCalendar enableAddDate={true} patientInfo={patientInfo} events={patientInfo.events} />
                 </Offcanvas.Body>
             </Offcanvas>
         </>
     );
 };
 
-export default OffCanvasInfo;
+export default OffCanvasCalendar;
