@@ -1,4 +1,4 @@
-import mongoose, { Schema, models } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const PulxiometroDataSchema = new Schema({
   id_paciente: {
@@ -7,14 +7,17 @@ const PulxiometroDataSchema = new Schema({
   ppm: {
     type: Number,
   },
+  spo2: {
+    type: Number,
+  },
   id_pulsioximetro: { type: String },
   timestamp: { type: Date },
 });
 
-let PulxiometroData: any;
+let PulxiometroData;
 
 if (mongoose.models.pulsioximetroDataCompleto) {
-    PulxiometroData = mongoose.model("pulsioximetroDataCompleto",PulxiometroDataSchema, "pulsioximetroDataCompleto");
+    PulxiometroData = mongoose.model("pulsioximetroDataCompleto");
 } else {
     PulxiometroData = mongoose.model(
         "pulsioximetroDataCompleto",

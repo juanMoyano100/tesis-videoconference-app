@@ -38,6 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         id_paciente: "",
         id_pulsioximetro: id_pulsioximetro,
         ppm: parseInt(ppm),
+        spo2: parseInt(req.body.spo2),
         timestamp: new Date(), // Current timestamp
       };
       const result = await collection.insertOne(document);

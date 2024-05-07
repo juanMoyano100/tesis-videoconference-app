@@ -120,6 +120,12 @@ const OffCanvasPulxiometro = () => {
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
+      {
+        label: "SP02",
+        data: displayData.map((item: any) => item.spo2),
+        borderColor: "rgb(54, 162, 235)",
+        backgroundColor: "rgb(54, 162, 235)",
+      },
     ],
   };
 
