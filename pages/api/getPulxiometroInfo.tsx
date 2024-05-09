@@ -15,7 +15,7 @@ const getPulxiometroInfo = async (
     if (!id_pulsioximetro) {
       return res.status(500).json({ message: "Error al obtener datos" });
     }
-    const request = await PulxiometroData.find({
+    const request = await (PulxiometroData as any).find({
       id_pulsioximetro,
       timestamp: { $gte: oneMinutesAgo },
     }).sort({ createdAt: -1 });

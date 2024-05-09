@@ -14,10 +14,10 @@ const PulxiometroDataSchema = new Schema({
   timestamp: { type: Date },
 });
 
-let PulxiometroData;
+let PulxiometroData: any;
 
 if (mongoose.models.pulsioximetroDataCompleto) {
-    PulxiometroData = mongoose.model("pulsioximetroDataCompleto");
+    PulxiometroData = mongoose.model("pulsioximetroDataCompleto",PulxiometroDataSchema, "pulsioximetroDataCompleto");
 } else {
     PulxiometroData = mongoose.model(
         "pulsioximetroDataCompleto",
