@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                 </Col>
-                <Col>
+                <Col md={6} sm={12} className="p-0">
                     <LoginForm/>
                 </Col>
             </Row>
