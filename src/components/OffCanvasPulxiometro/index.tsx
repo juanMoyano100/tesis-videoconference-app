@@ -20,15 +20,26 @@ import {
 import { Line } from "react-chartjs-2";
 import moment from "moment";
 
-const OffCanvasPulxiometro = () => {
+interface propsTypes {
+  setScreenWidth: (value: string) => void;
+  isPatient: boolean;
+}
+
+const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
   const [show, setShow] = useState(false);
 
   const handleClose = () => {
     setShow(false);
     handleStopGetPulxiometroData();
     setShowPulxiometroInfo(false);
+    setScreenWidth("100%");
   };
-  const toggleShow = () => setShow((s) => !s);
+
+  const toggleShow = () => {
+    setScreenWidth("50%");
+    setShow(true);
+  };
+
   const [pulxiometroData, setPulxiometroData] = useState([]);
   const [globalInterval, setGlobalInterval] = useState(5000);
   const [dataStarted, setDataStarted] = useState(false);
@@ -57,6 +68,12 @@ const OffCanvasPulxiometro = () => {
     clearInterval(globalInterval);
     setDataStarted(false);
     clearInterval(timerInterval.current);
+  };
+
+  const handleResetValues = () => {
+    setDisplayData([]);
+    handleStopGetPulxiometroData();
+    setSeconds(0);
   };
 
   const [displayData, setDisplayData] = useState([]);
@@ -153,7 +170,7 @@ const OffCanvasPulxiometro = () => {
         <Offcanvas.Header closeButton>
           <Offcanvas.Title> Datos Pulxiometro</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body>
+        <Offcanvas.Body className="p-0">
           <div className="d-flex">
             {!showPulxiometroInfo ? (
               <>
@@ -176,25 +193,38 @@ const OffCanvasPulxiometro = () => {
                 </Button>
               </>
             ) : (
-              <>
-                <Button
-                  variant="primary"
-                  onClick={handleStartPulxiometroData}
-                  className="m-2"
-                >
-                  Obtener lectura
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={handleStopGetPulxiometroData}
-                  className="m-2"
-                >
-                  Detener lectura
-                </Button>
-                <div className="m-2" style={{ alignSelf: "center" }}>
-                  {formatTime(seconds)}
+              <div className="d-flex justify-content-between w-100">
+                <div className="d-flex ">
+                  <Button
+                    variant="primary"
+                    onClick={handleStartPulxiometroData}
+                    className="m-2"
+                  >
+                    Obtener lectura
+                  </Button>
+                  {!isPatient && (
+                    <Button
+                      variant="danger"
+                      onClick={handleStopGetPulxiometroData}
+                      className="m-2"
+                    >
+                      Detener lectura
+                    </Button>
+                  )}
+                  <div className="" style={{ alignSelf: "center" }}>
+                    <h2>{formatTime(seconds)}</h2>
+                  </div>
                 </div>
-              </>
+                <div className="">
+                  <Button
+                    variant="secondary"
+                    onClick={handleResetValues}
+                    className="m-2"
+                  >
+                    Reset Test
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
           <div className="m-2">
@@ -203,7 +233,7 @@ const OffCanvasPulxiometro = () => {
           <Container>
             <div
               className="d-flex"
-              style={{ height: "30vh", maxHeight: "30vh", overflow: "overlay" }}
+              style={{ height: "20vh", maxHeight: "20vh", overflow: "overlay" }}
             >
               <Table striped bordered hover size="sm">
                 <thead>
@@ -251,7 +281,7 @@ const OffCanvasPulxiometro = () => {
                   backgroundColor: "#f5f5f5",
                 }}
               >
-                <>Min</>
+                <>Min (ppm)</>
                 <h3>
                   {displayData.length > 0
                     ? Math.min(
@@ -273,7 +303,7 @@ const OffCanvasPulxiometro = () => {
                   backgroundColor: "#f5f5f5",
                 }}
               >
-                <>Max</>
+                <>Max (ppm)</>
                 <h3>
                   {displayData.length > 0
                     ? Math.max(...displayData.map((item: any) => item.ppm))
@@ -291,7 +321,7 @@ const OffCanvasPulxiometro = () => {
                   backgroundColor: "#f5f5f5",
                 }}
               >
-                <>Avg</>
+                <>Avg (ppm)</>
                 <h3>
                   {displayData.length > 0
                     ? Math.round(
@@ -305,9 +335,79 @@ const OffCanvasPulxiometro = () => {
               </div>
             </div>
           </Container>
+          <Container>
+            <div
+              className="d-flex justify-content-around align-items-center text-center mt-3"
+              style={{ color: "#666666" }}
+            >
+              <div
+                style={{
+                  width: "33%",
+                  margin: "0 5px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "5px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <>Min (spo2)</>
+                <h3>
+                  {displayData.length > 0
+                    ? Math.min(
+                        ...displayData
+                          .filter((item: any) => item.spo2 !== 0)
+                          .map((item: any) => item.spo2)
+                      )
+                    : 0}
+                </h3>
+              </div>
+              <div
+                style={{
+                  width: "33%",
+                  margin: "0 5px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "5px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <>Max (spo2)</>
+                <h3>
+                  {displayData.length > 0
+                    ? Math.max(...displayData.map((item: any) => item.spo2))
+                    : 0}
+                </h3>
+              </div>
+              <div
+                style={{
+                  width: "33%",
+                  margin: "0 5px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "5px",
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                <>Avg (spo2)</>
+                <h3>
+                  {displayData.length > 0
+                    ? Math.round(
+                        displayData.reduce(
+                          (acc: number, item: any) => acc + item.spo2,
+                          0
+                        ) / displayData.length
+                      )
+                    : 0}
+                </h3>
+              </div>
+            </div>
+          </Container>
           <div className="d-flex">
             <Container>
-              <Line options={options} data={data} />
+              {!isPatient && <Line options={options} data={data} />}
             </Container>
           </div>
         </Offcanvas.Body>
