@@ -57,6 +57,7 @@ const VideoConferencePage: NextPage = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<any>(null);
   const [error, setError] = useState<string>("");
+  const [screenWidth, setScreenWidth] = useState<string>("100%");
 
   const [patientState, setPatientState] = useState<string>("");
   const [preJoinChoices, setPreJoinChoices] = useState<
@@ -384,7 +385,7 @@ const VideoConferencePage: NextPage = () => {
           {user?.role === "patient" && renderPatientPreCall()}
         </div>
       ) : (
-        <div style={{ height: "calc(100vh - 141px)" }}>
+        <div style={{ height: "calc(100vh - 136px)", width: screenWidth }}>
           <div
             className="d-flex py-2 justify-content-center"
             style={{ background: "#111" }}
@@ -403,8 +404,11 @@ const VideoConferencePage: NextPage = () => {
                 }}
               />
             )}
-            {user?.role === "doctor" && (
-              <OffCanvasPulxiometro />
+            {(user?.role === "doctor" || user?.role === "patient") && (
+              <OffCanvasPulxiometro
+                isPatient={user?.role === "patient"}
+                setScreenWidth={setScreenWidth}
+              ></OffCanvasPulxiometro>
             )}
           </div>
 
