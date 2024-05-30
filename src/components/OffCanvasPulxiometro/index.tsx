@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Button,
-  Container,
-  Form,
-  Offcanvas,
-  Table,
-} from "react-bootstrap";
+import { Button, Container, Form, Offcanvas, Table } from "react-bootstrap";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -44,6 +38,7 @@ const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
   const [dataStarted, setDataStarted] = useState(false);
   const [pulxiometroId, setPulxiometroId] = useState("");
   const [showPulxiometroInfo, setShowPulxiometroInfo] = useState(false);
+  const [showMTC, setShowMTC] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const timerInterval = useRef<any>();
 
@@ -71,28 +66,29 @@ const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
 
   const handleResetValues = () => {
     setDisplayData([]);
+    setPulxiometroData([]);
     handleStopGetPulxiometroData();
     setSeconds(0);
   };
 
   const [displayData, setDisplayData] = useState([]);
-  const indexRef = useRef(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (indexRef.current < pulxiometroData.length - 1) {
-        setDisplayData((prevData) => [
-          ...prevData,
-          pulxiometroData[indexRef.current],
-        ]);
-        indexRef.current++;
-      } else {
-        clearInterval(interval);
-      }
+    const graphInterval = setInterval(() => {
+      const lastThreeData = pulxiometroData.slice(-2); // Get the last three items
+
+      lastThreeData.forEach((data, index) => {
+        if (!displayData.includes(data)) {
+          setDisplayData((prevData) => [...prevData, data]);
+        }
+      });
     }, 300);
 
-    return () => clearInterval(interval);
-  }, [pulxiometroData]);
+    // Don't forget to clear the interval when the component unmounts
+    return () => {
+      clearInterval(graphInterval);
+    };
+  }, [pulxiometroData, displayData]);
 
   ChartJS.register(
     CategoryScale,
@@ -114,6 +110,14 @@ const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
         display: true,
         text: "Pulxiometro",
       },
+    },
+    scales: {
+      x: {
+        ticks: {
+          display: false,
+        },
+      },
+      y: {},
     },
   };
 
@@ -166,14 +170,14 @@ const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
         placement="end"
         style={{ width: "50%" }}
       >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title> Datos Pulxiometro</Offcanvas.Title>
-        </Offcanvas.Header>
         <Offcanvas.Body className="p-0">
           <div className="d-flex">
             {!showPulxiometroInfo ? (
               <>
-                <Form.Label style={{ width: "200px", alignSelf: "center" }}>
+                <Form.Label
+                  className="mx-2"
+                  style={{ width: "200px", alignSelf: "center" }}
+                >
                   Nro. Pulxiometro
                 </Form.Label>
                 <Form.Control
@@ -240,6 +244,7 @@ const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
                     <th>#</th>
                     <th>Hora</th>
                     <th>PPM</th>
+                    <th>SP02</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -253,157 +258,181 @@ const OffCanvasPulxiometro = ({ setScreenWidth, isPatient }: propsTypes) => {
                             .format("HH:mm:ss")}
                         </td>
                         <td>{data.ppm}</td>
+                        <td>{data.spo2}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={3}>No hay datos</td>
+                      <td colSpan={4}>No hay datos</td>
                     </tr>
                   )}
                 </tbody>
               </Table>
             </div>
           </Container>
-          <Container>
-            <div
-              className="d-flex justify-content-around align-items-center text-center mt-3"
-              style={{ color: "#666666" }}
-            >
-              <div
-                style={{
-                  width: "33%",
-                  margin: "0 5px",
-                  fontWeight: "bold",
-                  fontSize: "10px",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "5px",
-                  backgroundColor: "#f5f5f5",
-                }}
+          {!showMTC && (
+            <Container>
+              <Button
+                variant="primary"
+                className="my-2"
+                onClick={() => setShowMTC(true)}
               >
-                <>Min (ppm)</>
-                <h3>
-                  {displayData.length > 0
-                    ? Math.min(
-                        ...displayData
-                          .filter((item: any) => item.ppm !== 0)
-                          .map((item: any) => item.ppm)
-                      )
-                    : 0}
-                </h3>
-              </div>
-              <div
-                style={{
-                  width: "33%",
-                  margin: "0 5px",
-                  fontWeight: "bold",
-                  fontSize: "10px",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "5px",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <>Max (ppm)</>
-                <h3>
-                  {displayData.length > 0
-                    ? Math.max(...displayData.map((item: any) => item.ppm))
-                    : 0}
-                </h3>
-              </div>
-              <div
-                style={{
-                  width: "33%",
-                  margin: "0 5px",
-                  fontWeight: "bold",
-                  fontSize: "10px",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "5px",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <>Avg (ppm)</>
-                <h3>
-                  {displayData.length > 0
-                    ? Math.round(
-                        displayData.reduce(
-                          (acc: number, item: any) => acc + item.ppm,
-                          0
-                        ) / displayData.length
-                      )
-                    : 0}
-                </h3>
-              </div>
-            </div>
-          </Container>
-          <Container>
-            <div
-              className="d-flex justify-content-around align-items-center text-center mt-3"
-              style={{ color: "#666666" }}
-            >
-              <div
-                style={{
-                  width: "33%",
-                  margin: "0 5px",
-                  fontWeight: "bold",
-                  fontSize: "10px",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "5px",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <>Min (spo2)</>
-                <h3>
-                  {displayData.length > 0
-                    ? Math.min(
-                        ...displayData
-                          .filter((item: any) => item.spo2 !== 0)
-                          .map((item: any) => item.spo2)
-                      )
-                    : 0}
-                </h3>
-              </div>
-              <div
-                style={{
-                  width: "33%",
-                  margin: "0 5px",
-                  fontWeight: "bold",
-                  fontSize: "10px",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "5px",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <>Max (spo2)</>
-                <h3>
-                  {displayData.length > 0
-                    ? Math.max(...displayData.map((item: any) => item.spo2))
-                    : 0}
-                </h3>
-              </div>
-              <div
-                style={{
-                  width: "33%",
-                  margin: "0 5px",
-                  fontWeight: "bold",
-                  fontSize: "10px",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "5px",
-                  backgroundColor: "#f5f5f5",
-                }}
-              >
-                <>Avg (spo2)</>
-                <h3>
-                  {displayData.length > 0
-                    ? Math.round(
-                        displayData.reduce(
-                          (acc: number, item: any) => acc + item.spo2,
-                          0
-                        ) / displayData.length
-                      )
-                    : 0}
-                </h3>
-              </div>
-            </div>
-          </Container>
+                Informe actual
+              </Button>
+            </Container>
+          )}
+          {showMTC && (
+            <>
+              <Container className="d-flex my-2">
+                <Button variant="secondary" onClick={() => setShowMTC(false)}>
+                  Ocultar informe actual
+                </Button>
+                <div className="mx-2" style={{ alignSelf: "center" }}>
+                  <h3>En un tiempo de {formatTime(seconds)}</h3>
+                </div>
+              </Container>
+              <Container>
+                <div
+                  className="d-flex justify-content-around align-items-center text-center mt-3"
+                  style={{ color: "#666666" }}
+                >
+                  <div
+                    style={{
+                      width: "33%",
+                      margin: "0 5px",
+                      fontWeight: "bold",
+                      fontSize: "10px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: "5px",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <>Mínimo (ppm)</>
+                    <h3>
+                      {displayData.length > 0
+                        ? Math.min(
+                            ...displayData
+                              .filter((item: any) => item.ppm !== 0)
+                              .map((item: any) => item.ppm)
+                          )
+                        : 0}
+                    </h3>
+                  </div>
+                  <div
+                    style={{
+                      width: "33%",
+                      margin: "0 5px",
+                      fontWeight: "bold",
+                      fontSize: "10px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: "5px",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <>Máximo (ppm)</>
+                    <h3>
+                      {displayData.length > 0
+                        ? Math.max(...displayData.map((item: any) => item.ppm))
+                        : 0}
+                    </h3>
+                  </div>
+                  <div
+                    style={{
+                      width: "33%",
+                      margin: "0 5px",
+                      fontWeight: "bold",
+                      fontSize: "10px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: "5px",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <>Promedio (ppm)</>
+                    <h3>
+                      {displayData.length > 0
+                        ? Math.round(
+                            displayData.reduce(
+                              (acc: number, item: any) => acc + item.ppm,
+                              0
+                            ) / displayData.length
+                          )
+                        : 0}
+                    </h3>
+                  </div>
+                </div>
+              </Container>
+              <Container>
+                <div
+                  className="d-flex justify-content-around align-items-center text-center mt-3"
+                  style={{ color: "#666666" }}
+                >
+                  <div
+                    style={{
+                      width: "33%",
+                      margin: "0 5px",
+                      fontWeight: "bold",
+                      fontSize: "10px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: "5px",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <>Mínimo (spo2)</>
+                    <h3>
+                      {displayData.length > 0
+                        ? Math.min(
+                            ...displayData
+                              .filter((item: any) => item.spo2 !== 0)
+                              .map((item: any) => item.spo2)
+                          )
+                        : 0}
+                    </h3>
+                  </div>
+                  <div
+                    style={{
+                      width: "33%",
+                      margin: "0 5px",
+                      fontWeight: "bold",
+                      fontSize: "10px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: "5px",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <>Máxmo (spo2)</>
+                    <h3>
+                      {displayData.length > 0
+                        ? Math.max(...displayData.map((item: any) => item.spo2))
+                        : 0}
+                    </h3>
+                  </div>
+                  <div
+                    style={{
+                      width: "33%",
+                      margin: "0 5px",
+                      fontWeight: "bold",
+                      fontSize: "10px",
+                      border: "1px solid #e5e5e5",
+                      borderRadius: "5px",
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <>Promedio (spo2)</>
+                    <h3>
+                      {displayData.length > 0
+                        ? Math.round(
+                            displayData.reduce(
+                              (acc: number, item: any) => acc + item.spo2,
+                              0
+                            ) / displayData.length
+                          )
+                        : 0}
+                    </h3>
+                  </div>
+                </div>
+              </Container>
+            </>
+          )}
           <div className="d-flex">
             <Container>
               {!isPatient && <Line options={options} data={data} />}

@@ -380,7 +380,7 @@ const VideoConferencePage: NextPage = () => {
   return (
     <Layout data-lk-theme="default">
       {!isConnected ? (
-        <div style={{ background: "#111", height: "calc(100vh - 74px)" }}>
+        <div style={{ background: "#111", height: "calc(100vh - 68px)" }}>
           {user?.role === "doctor" && renderDoctorPreCall()}
           {user?.role === "patient" && renderPatientPreCall()}
         </div>

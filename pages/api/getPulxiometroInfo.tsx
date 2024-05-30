@@ -11,13 +11,13 @@ const getPulxiometroInfo = async (
   try {
     await connectMongoDB();
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    const oneMinutesAgo = new Date(Date.now() - 60 * 1000);
+    const oneMinAgo = new Date(Date.now() - 60 * 1000);
     if (!id_pulsioximetro) {
       return res.status(500).json({ message: "Error al obtener datos" });
     }
-    const request = await (PulxiometroData as any).find({
+    const request = await PulxiometroData.find({
       id_pulsioximetro,
-      timestamp: { $gte: oneMinutesAgo },
+      timestamp: { $gte: oneMinAgo },
     }).sort({ createdAt: -1 });
 
     if (!request) {

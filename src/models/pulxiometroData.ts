@@ -17,13 +17,13 @@ const PulxiometroDataSchema = new Schema({
 let PulxiometroData: any;
 
 if (mongoose.models.pulsioximetroDataCompleto) {
-    PulxiometroData = mongoose.model("pulsioximetroDataCompleto",PulxiometroDataSchema, "pulsioximetroDataCompleto");
+  PulxiometroData = mongoose.model("pulsioximetroDataCompleto");
 } else {
-    PulxiometroData = mongoose.model(
-        "pulsioximetroDataCompleto",
-        PulxiometroDataSchema,
-        "pulsioximetroDataCompleto"
-    );
+  PulxiometroData = mongoose.model(
+      "pulsioximetroDataCompleto",
+      PulxiometroDataSchema,
+      "pulsioximetroDataCompleto"
+  );
 }
 
 export default PulxiometroData;
